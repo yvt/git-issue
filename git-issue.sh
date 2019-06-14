@@ -154,7 +154,9 @@ edit()
   cp "$file" "$file.new"
   echo "Opening editor..."
   ${VISUAL:-vi} "$file.new" || return 1
-  grep -v '^#' "$file.new" >"$file.uncommented"
+  # Remove lines starting `#`. However, do not remove Markdown headings of
+  # level ≥ 2
+  grep -v '^#[^#]' "$file.new" >"$file.uncommented"
   mv "$file.uncommented" "$file.new"
   if ! test -s "$file.new" ; then
     echo 'Empty file' 1>&2
