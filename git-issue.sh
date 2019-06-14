@@ -155,25 +155,26 @@ edit()
   local file
 
   file="$1"
+  file_new="$file.new.md"
   touch "$file"
-  cp "$file" "$file.new"
+  cp "$file" "$file_new"
   echo "Opening editor..."
-  ${VISUAL:-vi} "$file.new" || return 1
+  ${VISUAL:-vi} "$file_new" || return 1
   # Remove lines starting `#`. However, do not remove Markdown headings of
   # level ≥ 2
-  grep -v '^#[^#]' "$file.new" >"$file.uncommented"
-  mv "$file.uncommented" "$file.new"
-  if ! test -s "$file.new" ; then
+  grep -v '^#[^#]' "$file_new" >"$file.uncommented"
+  mv "$file.uncommented" "$file_new"
+  if ! test -s "$file_new" ; then
     echo 'Empty file' 1>&2
-    rm -f "$file.new"
+    rm -f "$file_new"
     return 1
   fi
-  if diff -q "$file" "$file.new" >/dev/null 2>&1; then
+  if diff -q "$file" "$file_new" >/dev/null 2>&1; then
     echo 'File was not changed' 1>&2
-    rm -f "$file.new"
+    rm -f "$file_new"
     return 1
   fi
-  mv "$file.new" "$file"
+  mv "$file_new" "$file"
 }
 
 # Pipe input through the user's pager
