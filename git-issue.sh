@@ -935,11 +935,6 @@ color_tag()
   done
 }
 
-join_lines()
-{
-  sed -e 'N;s/\n/ /'
-}
-
 # helper function for long listing format, each call proccesses a single issue
 shortshow()
 {
@@ -962,7 +957,8 @@ shortshow()
 
   # Tags
   if [ -s "$path/tags" ] ; then
-    tags=$(cat "$path/tags"|color_tag|join_lines|escape_sed_subst)
+    # combine tags into a single lins using `echo $(...)`
+    tags=$(echo $(cat "$path/tags"|color_tag)|escape_sed_subst)
   fi
 
   # Description
@@ -1052,7 +1048,7 @@ sub_list()
   else
     while read -r path id ; do
       printf '%s' "$id "
-      echo -n $(cat "$path/tags" | color_tag | join_lines) ''
+      echo -n $(cat "$path/tags" | color_tag) ''
       head -1 "$path/description"
     done |
     sort -k 2
