@@ -1044,6 +1044,7 @@ sub_list()
   else
     while read -r path id ; do
       printf '%s' "$id "
+      echo -n $(cat "$path/tags" | color_tag | join_lines) ''
       head -1 "$path/description"
     done |
     sort -k 2
