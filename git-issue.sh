@@ -172,7 +172,50 @@ edit()
 # Pipe input through the user's pager
 pager()
 {
-  ${PAGER:-more}
+  ${PAGER:-less -R}
+}
+
+# Output an ANSI sequence for coloring the output.
+# e.g.,
+#  - `color bg:darkred fg:white` sets colors.
+#  - `color` resets the color.
+color()
+{
+  # TODO: Disable this function when the output is not TTY
+  if [ "$1" == "" ]; then
+    printf '\e[0m'
+    return
+  fi
+  while [ "$1" != "" ]; do
+    case "$1" in
+      "fg:black") printf '\e[30m' ;;
+      "fg:darkred") printf '\e[31m' ;;
+      "fg:darkgreen") printf '\e[32m' ;;
+      "fg:darkyellow") printf '\e[33m' ;;
+      "fg:darkblue") printf '\e[34m' ;;
+      "fg:darkmagenta") printf '\e[35m' ;;
+      "fg:darkcyan") printf '\e[36m' ;;
+      "fg:silver") printf '\e[37m' ;;
+      "fg:darkgray") printf '\e[38;5;238m' ;;
+      "fg:white") printf '\e[38:5:15m' ;;
+      "bg:black") printf  '\e[40m';;
+      "bg:darkred") printf '\e[41m' ;;
+      "bg:darkgreen") printf '\e[42m' ;;
+      "bg:darkyellow") printf '\e[43m' ;;
+      "bg:darkblue") printf '\e[44m' ;;
+      "bg:darkmagenta") printf '\e[45m' ;;
+      "bg:darkcyan") printf '\e[46m' ;;
+      "bg:silver") printf '\e[47m' ;;
+      "bg:gray") printf '\e[48;5;238m' ;;
+      *) echo -n "<unknown color: $1>" ;;
+    esac
+    shift
+  done
+}
+
+escape_sed_subst()
+{
+  hexdump -ve '"\\" 1/1 "x%.2x"'
 }
 
 # init: Initialize a new issue repository {{{1
@@ -872,6 +915,23 @@ USAGE_list_EOF
   exit 2
 }
 
+color_tag()
+{
+  while read -r tag; do
+    # Apply the color based on the configuration
+    color bg:gray fg:white $(jq -r ".tag_colors[\"$tag\"]" config|grep -v null)
+    echo -n " $tag "
+    # Reset the color
+    color
+    echo ''
+  done
+}
+
+join_lines()
+{
+  sed -e 'N;s/\n/ /'
+}
+
 # helper function for long listing format, each call proccesses a single issue
 shortshow()
 {
@@ -894,7 +954,7 @@ shortshow()
 
   # Tags
   if [ -s "$path/tags" ] ; then
-    tags=$(fmt "$path/tags"|sed -e 's/[\/&]/\\&/g')
+    tags=$(cat "$path/tags"|color_tag|join_lines|escape_sed_subst)
   fi
 
   # Description
@@ -903,7 +963,7 @@ shortshow()
   # Print the field to sort by first, and remove it after sorting 
   (echo "$sortfield"$'\002'"$formatstring") | 
 
-  sed -e s/%n/$'\001'/g \
+  $SED -e s/%n/$'\001'/g \
   -e s/%i/"$id"/g \
   -e s/%c/"$date"/g \
   -e s/%M/"$milestone"/g \
