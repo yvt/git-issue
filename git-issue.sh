@@ -30,6 +30,11 @@ USER_AGENT=https://github.com/dspinellis/git-issue/tree/a43f457
 SED=sed
 which gsed > /dev/null && SED=gsed
 
+# Syntax highlighter for Markdown
+# bat: <https://github.com/sharkdp/bat>
+FORMAT_MARKDOWN=cat
+which bat > /dev/null && FORMAT_MARKDOWN='bat -p -l md --color always'
+
 # Exit after displaying the specified error
 error()
 {
@@ -392,7 +397,7 @@ Date:	%aD' "$isha"
 
     # Description
     echo
-    sed 's/^/    /' "$path/description"
+    cat "$path/description" | $FORMAT_MARKDOWN | sed 's/^/    /'
 
     # Edit History
     echo
@@ -408,7 +413,7 @@ Date:	%aD' "$isha"
       git show --no-patch --format='Author:	%an <%ae>
 Date:	%aD
 ' "$csha"
-      sed 's/^/    /' "$path/comments/$csha"
+      cat "$path/comments/$csha" | $FORMAT_MARKDOWN | sed 's/^/    /'
     done
   } | pager
 }
