@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # shellcheck disable=SC2039
 #
 # Shellcheck ignore list:
@@ -25,6 +25,10 @@
 
 # User agent string
 USER_AGENT=https://github.com/dspinellis/git-issue/tree/a43f457
+
+# BSD sed doesn't support `\x42`
+SED=sed
+which gsed > /dev/null && SED=gsed
 
 # Exit after displaying the specified error
 error()
