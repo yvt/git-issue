@@ -1039,7 +1039,7 @@ sub_list()
       shortshow
     done |
     sort $sortrev |
-    sed 's/^.*\x02//' |
+    $SED 's/^.*\x02//' |
     tr '\001' '\n'
   else
     while read -r path id ; do
